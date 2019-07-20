@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-sms-util",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Cordova plugin to operate send SMS on dual sim",
   "cordova": {
     "id": "cordova-plugin-sms-util",
