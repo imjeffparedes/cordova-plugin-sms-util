@@ -1,0 +1,33 @@
+{
+  "name": "cordova-plugin-sms-util",
+  "version": "0.1.0",
+  "description": "Cordova plugin to operate send SMS on dual sim",
+  "cordova": {
+    "id": "cordova-plugin-sms-util",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imjeffparedes/cordova-plugin-sms-util.git"
+  },
+  "keywords": [
+    "comgtech",
+    "sms",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "author": "Jeff Paredes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/imjeffparedes/cordova-plugin-sms-util/issues"
+  },
+  "homepage": "https://github.com/imjeffparedes/cordova-plugin-sms-util#readme"
+}
