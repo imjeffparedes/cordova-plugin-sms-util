@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	id="cordova-plugin-sms-util"
-	version="0.1.4">
+	version="0.2.0">
       
     <name>SmsUtil</name>
 	<description>Cordova plugin to operate send SMS on dual sim</description>
@@ -28,9 +28,15 @@
         </config-file>
         
         <config-file target="AndroidManifest.xml" parent="/*">
-		    <uses-feature android:name="android.hardware.telephony" android:required="false" />
-		    <uses-permission android:name="android.permission.SEND_SMS" />
-          </config-file>
+            <uses-feature android:name="android.hardware.telephony" android:required="false" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+            <uses-permission android:name="android.permission.RECEIVE_SMS" />
+            <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+            <uses-permission android:name="android.permission.RECEIVE_MMS" />
+            <uses-permission android:name="android.permission.READ_SMS" />
+            <uses-permission android:name="android.permission.WRITE_SMS" />
+            <uses-permission android:name="android.permission.SEND_SMS" />
+        </config-file>
           
 		<source-file src="src/android/SmsUtil.java" target-dir="src/com/imjeffparedes"/>
     </platform>
