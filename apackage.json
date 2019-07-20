@@ -1,0 +1,55 @@
+{
+  "_from": "cordova-plugin-sms-util",
+  "_id": "cordova-plugin-sms-util@0.1.0",
+  "_inBundle": false,
+  "_location": "/cordova-plugin-sms-util",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "cordova-plugin-sms-util",
+    "name": "cordova-plugin-sms-util",
+    "escapedName": "cordova-plugin-sms-util",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-sms-util/-/cordova-plugin-sms-util-1.0.5.tgz",
+  "_shasum": "66440954c19f73ee3e8e35e5c71ae123f43cb7b2",
+  "_spec": "cordova-plugin-sms-util",
+  "_where": "/Users/pmgcti/Documents/cti/project/dev/loadwallet/loadwallet-mobile-sms-util",
+  "author": {
+    "name": "Raymond Xie",
+    "email": "rjfun.mobile@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/floatinghotpot/cordova-plugin-sms-util/issues"
+  },
+  "bundleDependencies": false,
+  "cordova": {
+    "id": "cordova-plugin-sms-util",
+    "platforms": [
+      "android"
+    ]
+  },
+  "deprecated": false,
+  "description": "Cordova plugin to operate sms-util, send/list/intercept/delete/restore",
+  "homepage": "https://github.com/floatinghotpot/cordova-plugin-sms-util#readme",
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "sms-util",
+    "rjfun"
+  ],
+  "license": "MIT",
+  "name": "cordova-plugin-sms-util",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/floatinghotpot/cordova-plugin-sms-util.git"
+  },
+  "version": "1.0.5"
+}
