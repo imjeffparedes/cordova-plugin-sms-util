@@ -27,7 +27,7 @@ extends CordovaPlugin {
      @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("sendSMS")) {
-            String simID = args.getInt(0); 
+            Integer simID = args.getInt(0); 
             String toNum = args.getString(1); 
             String smsText = args.getString(2); 
             return this.sendSMS(simID, toNum, smsText, callbackContext);
