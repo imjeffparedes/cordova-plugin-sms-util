@@ -1,4 +1,4 @@
-package com.imjeffparedes.SmsUtil;
+package com.imjeffparedes;
 
 import android.app.PendingIntent;
 import android.content.Context;
