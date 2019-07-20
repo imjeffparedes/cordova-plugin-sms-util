@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	id="cordova-plugin-sms-util"
-	version="0.2.0">
+	version="0.2.1">
       
     <name>SmsUtil</name>
 	<description>Cordova plugin to operate send SMS on dual sim</description>

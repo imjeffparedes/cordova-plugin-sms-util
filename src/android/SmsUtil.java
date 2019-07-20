@@ -28,6 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Build;
+import android.os.IBinder;
+import java.lang.reflect.Method;
+
 public class SmsUtil
 extends CordovaPlugin {
     private static final String LOGTAG = "SmsUtil";
@@ -411,7 +415,7 @@ extends CordovaPlugin {
                 Log.d(LOGTAG, ("onRecieve: " + action));
                 if (SMS_RECEIVED.equals(action)) {
                     Bundle bundle;
-                    if (SMSPlugin.this.mIntercept) {
+                    if (SmsUtil.this.mIntercept) {
                         this.abortBroadcast();
                     }
                     if ((bundle = intent.getExtras()) != null) {
@@ -419,8 +423,8 @@ extends CordovaPlugin {
                         if ((pdus = (Object[])bundle.get("pdus")).length != 0) {
                             for (int i = 0; i < pdus.length; ++i) {
                                 SmsMessage sms = SmsMessage.createFromPdu((byte[])((byte[])pdus[i]));
-                                JSONObject json = SMSPlugin.this.getJsonFromSmsMessage(sms);
-                                SMSPlugin.this.onSMSArrive(json);
+                                JSONObject json = SmsUtil.this.getJsonFromSmsMessage(sms);
+                                SmsUtil.this.onSMSArrive(json);
                             }
                         }
                     }
@@ -467,7 +471,7 @@ extends CordovaPlugin {
                     Log.d(LOGTAG, ("n = " + n));
                     if (n > 0 && cur.moveToFirst()) {
                         JSONObject json;
-                        if ((json = SMSPlugin.this.getJsonFromCursor(cur)) != null) {
+                        if ((json = SmsUtil.this.getJsonFromCursor(cur)) != null) {
                             onSMSArrive(json);
                         } else {
                             Log.d(LOGTAG, "fetch record return null");
