@@ -20,7 +20,7 @@ import org.apache.cordova.CordovaPlugin;
 
 
 /**
- * Created by Apipas on 6/4/15.
+ * Created by Jefferson Paredes on July 20, 2019.
  */
 public class SmsUtil 
 extends CordovaPlugin {
