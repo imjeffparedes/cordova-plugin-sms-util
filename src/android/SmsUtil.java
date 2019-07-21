@@ -230,6 +230,7 @@ public class SmsUtil
         final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
             boolean anyError = false; //use to detect if one of the parts failed
+            String errorMessage = "";//use to identify any error
             int partsCount = parts.size(); //number of parts to send
 
             @Override
@@ -239,9 +240,17 @@ public class SmsUtil
                     case Activity.RESULT_OK:
                         break;
                     case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                        errorMessage = "Unable to send sms. Generic failure cause.";
                     case SmsManager.RESULT_ERROR_NO_SERVICE:
+                        errorMessage = "SMS failed because service is currently unavailable";
                     case SmsManager.RESULT_ERROR_NULL_PDU:
+                        errorMessage = "SMS Failed because no pdu provided";
+                    case SmsManager.RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED:
+                        errorMessage = "SMS Failed because the user has denied this app ever send premium short codes.";
+                    case SmsManager.RESULT_ERROR_SHORT_CODE_NOT_ALLOWED:
+                        errorMessage = "SMS Failed because user denied the sending of this short code";
                     case SmsManager.RESULT_ERROR_RADIO_OFF:
+                        errorMessage = "SMS Failed because service was explicitly turned off";
                         anyError = true;
                         break;
                 }
@@ -249,9 +258,9 @@ public class SmsUtil
                 partsCount--;
                 if (partsCount == 0) {
                     if (anyError) {
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, errorMessage));
                     } else {
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK,"SMS Sent!"));
                     }
                     cordova.getActivity().unregisterReceiver(this);
                 }
