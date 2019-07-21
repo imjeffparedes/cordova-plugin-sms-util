@@ -58,11 +58,11 @@ safesmsExport.sendSMS = function(address, text, successCallback, failureCallback
 };
 
 safesmsExport.sendSMSOnSim1 = function(address, text, successCallback, failureCallback) {
-	if(typeof address !== 'string'){
+	if(typeof address == 'string'){
 
-	}else if(typeof text !== 'string'){
+	}else if(typeof text == 'string'){
 
-	}else if(typeof failureCallback === 'function') {
+	}else if(typeof failureCallback == 'function') {
 		failureCallback("require text message, address or phone number as string");
 		return;
 	}
