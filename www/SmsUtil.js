@@ -1,4 +1,3 @@
-
 var argscheck = require('cordova/argscheck'),
     exec = require('cordova/exec');
 
@@ -41,20 +40,21 @@ safesmsExport.enableIntercept = function(on_off, successCallback, failureCallbac
 	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'enableIntercept', [ on_off ] );
 };
 
-safesmsExport.sendSMS = function(address, text, successCallback, failureCallback) {
-	var numbers;
-	if( Object.prototype.toString.call( address ) === '[object Array]' ) {
-		numbers = address;
-	} else if(typeof address === 'string') {
-		numbers = [ address ];
-	} else {
-		if(typeof failureCallback === 'function') {
-			failureCallback("require address, phone number as string, or array of string");
-		}
-		return;
+safesmsExport.sendSMS = function(simId, address, text, successCallback, failureCallback) {
+	var error = null;
+	if(typeof address !== 'string'){
+		error = "require one address as string";
+	}else if(typeof text !== 'string'){
+		error = "require text message as string";
+	}else if(typeof simId !== 'number'){
+		error = "require simId as number - could be 0 or 1";
+	}
+
+	if(error && typeof failureCallback === 'function'){
+		return failureCallback("require one address as string");
 	}
 	
-	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMSOnSim1', [ numbers, text ] );
+	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMS', [ simId, address, text ] );
 };
 
 safesmsExport.sendSMSOnSim1 = function(address, text, successCallback, failureCallback) {
