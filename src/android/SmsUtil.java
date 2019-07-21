@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.util.Log;
 
 import java.security.MessageDigest;
@@ -31,6 +33,7 @@ import org.json.JSONObject;
 import android.os.Build;
 import android.os.IBinder;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class SmsUtil
 extends CordovaPlugin {
