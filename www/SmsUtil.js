@@ -51,33 +51,35 @@ safesmsExport.sendSMS = function(simId, address, text, successCallback, failureC
 	}
 
 	if(error && typeof failureCallback === 'function'){
-		return failureCallback("require one address as string");
+		return failureCallback(error);
 	}
 	
 	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMS', [ simId, address, text ] );
 };
 
 safesmsExport.sendSMSOnSim1 = function(address, text, successCallback, failureCallback) {
-	if(typeof address == 'string'){
-
-	}else if(typeof text == 'string'){
-
-	}else if(typeof failureCallback == 'function') {
-		failureCallback("require text message, address or phone number as string");
-		return;
+	var error = null;
+	if(typeof address !== 'string'){
+		error = "require one address as string";
+	}else if(typeof text !== 'string'){
+		error = "require text message as string";
+	}
+	if(error && typeof failureCallback === 'function'){
+		return failureCallback(error);
 	}
 	
 	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMSOnSim1', [ address, text ] );
 };
 
 safesmsExport.sendSMSOnSim2 = function(address, text, successCallback, failureCallback) {
-	if(typeof address == 'string'){
-
-	}else if(typeof text == 'string'){
-
-	}else if(typeof failureCallback === 'function') {
-		failureCallback("require text message, address or phone number as string");
-		return;
+	var error = null;
+	if(typeof address !== 'string'){
+		error = "require one address as string";
+	}else if(typeof text !== 'string'){
+		error = "require text message as string";
+	}
+	if(error && typeof failureCallback === 'function'){
+		return failureCallback(error);
 	}
 	
 	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMSOnSim2', [ address, text ] );
