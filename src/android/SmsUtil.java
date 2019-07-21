@@ -272,7 +272,8 @@ extends CordovaPlugin {
                     }
                 } else {
                     SmsManager.getDefault().sendTextMessage(address, null, text, sentPI, deliveredPI);
-                }
+                }    
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "OK"));
             }catch (Exception e) {
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Exception:" + e.getMessage()));
             }
@@ -308,7 +309,8 @@ extends CordovaPlugin {
                     }
                 } else {
                     SmsManager.getDefault().sendTextMessage(address, null, text, sentPI, deliveredPI);
-                }
+                }    
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "OK"));
             }catch (Exception e) {
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Exception:" + e.getMessage()));
             }
