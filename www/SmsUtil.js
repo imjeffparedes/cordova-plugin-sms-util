@@ -80,7 +80,7 @@ safesmsExport.sendSMSOnSim2 = function(address, text, successCallback, failureCa
 		return;
 	}
 	
-	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMSOnSim1', [ address, text ] );
+	cordova.exec( successCallback, failureCallback, 'SmsUtil', 'sendSMSOnSim2', [ address, text ] );
 };
 
 safesmsExport.listSMS = function(filter, successCallback, failureCallback) {
