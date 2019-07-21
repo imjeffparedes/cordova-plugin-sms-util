@@ -298,8 +298,6 @@ public class SmsUtil
         } else {
             SmsManager.getDefault().sendTextMessage(address, null, text, sentIntent, deliveredIntent);
         }
-        manager.sendTextMessage(address, null, text, sentIntent, null);
-
         return null;
     }
 
