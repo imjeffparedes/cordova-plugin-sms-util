@@ -248,27 +248,33 @@ extends CordovaPlugin {
         Context ctx = this.cordova.getActivity().getApplicationContext(); 
         if (this.cordova.getActivity().getPackageManager().hasSystemFeature("android.hardware.telephony")) {
             try {
-                Method method = Class.forName("android.os.ServiceManager").getDeclaredMethod("getService", String.class);
-                method.setAccessible(true);
-                Object param = method.invoke(null, "isms");
+                String SENT = "SMS_SENT", DELIVERED = "SMS_DELIVERED";
 
-                method = Class.forName("com.android.internal.telephony.ISms$Stub").getDeclaredMethod("asInterface", IBinder.class);
-                method.setAccessible(true);
-                Object stubObj = method.invoke(null, param);
-                if (Build.VERSION.SDK_INT < 18) {
-                    method = stubObj.getClass().getMethod("sendText", String.class, String.class, String.class, PendingIntent.class, PendingIntent.class);
-                    method.invoke(stubObj, address, null, text, null, null);
+                PendingIntent sentPI = PendingIntent.getBroadcast(ctx, 0, new Intent(
+                        SENT), 0);
+
+                PendingIntent deliveredPI = PendingIntent.getBroadcast(ctx, 0,
+                        new Intent(DELIVERED), 0);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    SubscriptionManager localSubscriptionManager = SubscriptionManager.from(ctx);
+                    if (localSubscriptionManager.getActiveSubscriptionInfoCount() > 1) {
+                        List localList = localSubscriptionManager.getActiveSubscriptionInfoList();
+
+                        SubscriptionInfo simInfo1 = (SubscriptionInfo) localList.get(0);
+                        SubscriptionInfo simInfo2 = (SubscriptionInfo) localList.get(1);
+
+                        //SendSMS From SIM One
+                        SmsManager.getSmsManagerForSubscriptionId(simInfo1.getSubscriptionId()).sendTextMessage(address, null, text, sentPI, deliveredPI);
+                    }
                 } else {
-                    method = stubObj.getClass().getMethod("sendText", String.class, String.class, String.class, String.class, PendingIntent.class, PendingIntent.class);
-                    method.invoke(stubObj, ctx.getPackageName(), address, null, text, null, null);
+                    SmsManager.getDefault().sendTextMessage(address, null, text, sentPI, deliveredPI);
                 }
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "OK"));
             }catch (Exception e) {
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Exception:" + e.getMessage()));
             }
         }else{
             callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "SMS is not supported"));
-        
         }
         return null;
     }
