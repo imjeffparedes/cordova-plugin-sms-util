@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.SubscriptionInfo;
@@ -31,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Build;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,9 +169,6 @@ public class SmsUtil
 
     private PluginResult startWatch(CallbackContext callbackContext) {
         Log.d(LOGTAG, ACTION_START_WATCH);
-        if (this.mObserver == null) {
-            this.createContentObserver();
-        }
         if (this.mReceiver == null) {
             this.createIncomingSMSReceiver();
         }
@@ -395,39 +394,49 @@ public class SmsUtil
         this.fireEvent("onSMSArrive", json);
     }
 
-    protected void createIncomingSMSReceiver() {
-        Activity ctx = this.cordova.getActivity();
-        this.mReceiver = new BroadcastReceiver(){
 
+    protected void createIncomingSMSReceiver() {
+        this.mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                Log.d(LOGTAG, ("onRecieve: " + action));
-                if (SMS_RECEIVED.equals(action)) {
-                    Bundle bundle;
-                    if (SmsUtil.this.mIntercept) {
-                        this.abortBroadcast();
-                    }
-                    if ((bundle = intent.getExtras()) != null) {
-                        Object[] pdus;
-                        if ((pdus = (Object[])bundle.get("pdus")).length != 0) {
-                            for (int i = 0; i < pdus.length; ++i) {
-                                SmsMessage sms = SmsMessage.createFromPdu((byte[])((byte[])pdus[i]));
-                                JSONObject json = SmsUtil.this.getJsonFromSmsMessage(sms);
-                                SmsUtil.this.onSMSArrive(json);
-                            }
+                if (intent.getAction().equals(SMS_RECEIVED)) {
+                    // Create SMS container
+                    SmsMessage smsmsg = null;
+                    // Determine which API to use
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        try {
+                            SmsMessage[] sms = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                            smsmsg = sms[0];
+                        } catch (Exception e) {
+                            Log.d(LOGTAG, e.getMessage());
                         }
+                    } else {
+                        Bundle bundle = intent.getExtras();
+                        Object pdus[] = (Object[]) bundle.get("pdus");
+                        try {
+                            smsmsg = SmsMessage.createFromPdu((byte[]) pdus[0]);
+                        } catch (Exception e) {
+                            Log.d(LOGTAG, e.getMessage());
+                        }
+                    }
+                    // Get SMS contents as JSON
+                    if(smsmsg != null) {
+                        JSONObject jsms = SmsUtil.this.getJsonFromSmsMessage(smsmsg);
+                        SmsUtil.this.onSMSArrive(jsms);
+                        Log.d(LOGTAG, jsms.toString());
+                    }else{
+                        Log.d(LOGTAG, "smsmsg is null");
                     }
                 }
             }
         };
-        String[] filterstr = new String[]{SMS_RECEIVED};
-        for (int i = 0; i < filterstr.length; ++i) {
-            IntentFilter filter = new IntentFilter(filterstr[i]);
-            filter.setPriority(100);
-            ctx.registerReceiver(this.mReceiver, filter);
-            Log.d(LOGTAG, ("broadcast receiver registered for: " + filterstr[i]));
+        IntentFilter filter = new IntentFilter(SMS_RECEIVED);
+        try {
+            webView.getContext().registerReceiver(this.mReceiver, filter);
+        } catch (Exception e) {
+            Log.d(LOGTAG, "error registering broadcast receiver: " + e.getMessage());
         }
     }
+
 
     protected void createContentObserver() {
         Activity ctx = this.cordova.getActivity();
