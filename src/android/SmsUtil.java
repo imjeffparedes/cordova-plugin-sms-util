@@ -1,6 +1,5 @@
 package com.imjeffparedes;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -9,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -46,8 +46,6 @@ public class SmsUtil
     private static final String ACTION_DELETE_SMS = "deleteSMS";
     private static final String ACTION_RESTORE_SMS = "restoreSMS";
     private static final String ACTION_SEND_SMS = "sendSMS";
-    private static final String ACTION_SEND_SMS_ON_SIM_1 = "sendSMSOnSim1";
-    private static final String ACTION_SEND_SMS_ON_SIM_2 = "sendSMSOnSim2";
 
     public static final String OPT_LICENSE = "license";
     private static final String SEND_SMS_ACTION = "SENT_SMS_ACTION";
@@ -88,6 +86,9 @@ public class SmsUtil
     private static final String NO_SMS_SERVICE_AVAILABLE = "NO_SMS_SERVICE_AVAILABLE";
     private static final String SMS_FEATURE_NOT_SUPPORTED = "SMS_FEATURE_NOT_SUPPORTED";
     private static final String SENDING_SMS_ID = "SENDING_SMS";
+    private static final String SENT = "SMS_SENT";
+    private static final String DELIVERED = "SMS_DELIVERED";
+
 
     private ContentObserver mObserver = null;
     private BroadcastReceiver mReceiver = null;
@@ -122,15 +123,7 @@ public class SmsUtil
             String address = inputs.optString(1);
             String message = inputs.optString(2);
             result = this.sendSMS(simId, address, message, callbackContext);
-        }else if (ACTION_SEND_SMS_ON_SIM_1.equals(action)) {
-            String address = inputs.optString(0);
-            String message = inputs.optString(1);
-            result = this.sendSMSOnSim1(address, message, callbackContext);
-        }else if (ACTION_SEND_SMS_ON_SIM_2.equals(action)) {
-            String address = inputs.optString(0);
-            String message = inputs.optString(1);
-            result = this.sendSMSOnSim2(address, message, callbackContext);
-        } else {
+        }else {
             Log.d(LOGTAG, String.format("Invalid action passed: %s", action));
             result = new PluginResult(PluginResult.Status.INVALID_ACTION);
         }
@@ -216,11 +209,10 @@ public class SmsUtil
 
     private PluginResult sendSMS(int simId, String address, String text, CallbackContext callbackContext) {
         Log.d(LOGTAG, ACTION_SEND_SMS);
-        if (!this.cordova.getActivity().getPackageManager().hasSystemFeature("android.hardware.telephony")) {
+        if (!checkSupport()) {
             callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "SMS is not supported"));
             return null;
         }
-        String SENT = "SMS_SENT", DELIVERED = "SMS_DELIVERED";
 
         Context ctx = this.cordova.getActivity().getApplicationContext();
         SmsManager manager = SmsManager.getDefault();
@@ -272,8 +264,6 @@ public class SmsUtil
         this.cordova.getActivity().registerReceiver(broadcastReceiver, new IntentFilter(intentFilterAction));
 
         PendingIntent sentIntent = PendingIntent.getBroadcast(this.cordova.getActivity(), 0, new Intent(intentFilterAction), 0);
-        PendingIntent deliveredIntent = PendingIntent.getBroadcast(ctx, 0,
-                new Intent(DELIVERED), 0);
 
         // depending on the number of parts we send a text message or multi parts
         if (parts.size() > 1) {
@@ -283,96 +273,21 @@ public class SmsUtil
             }
             //send multipart sms
             manager.sendMultipartTextMessage(address, null, parts, sentIntents, null);
-            return null;
         }
-
         //send short sms
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             SubscriptionManager localSubscriptionManager = SubscriptionManager.from(ctx);
             if (localSubscriptionManager.getActiveSubscriptionInfoCount() > 1) {
                 List localList = localSubscriptionManager.getActiveSubscriptionInfoList();
                 //get sim info
                 SubscriptionInfo simInfo = (SubscriptionInfo) localList.get(simId); //0 or 1
-                SmsManager.getSmsManagerForSubscriptionId(simInfo.getSubscriptionId()).sendTextMessage(address, null, text, sentIntent, deliveredIntent);
+                SmsManager.getSmsManagerForSubscriptionId(simInfo.getSubscriptionId()).sendTextMessage(address, null, text, sentIntent, null);
+            }else{
+                //send if device one sim
+                manager.sendTextMessage(address, null, text, sentIntent, null);
             }
         } else {
-            SmsManager.getDefault().sendTextMessage(address, null, text, sentIntent, deliveredIntent);
-        }
-        return null;
-    }
-
-
-    private PluginResult sendSMSOnSim1(String address, String text, CallbackContext callbackContext) {
-        Log.d(LOGTAG, ACTION_SEND_SMS_ON_SIM_1);
-        Context ctx = this.cordova.getActivity().getApplicationContext();
-        if (this.cordova.getActivity().getPackageManager().hasSystemFeature("android.hardware.telephony")) {
-            try {
-                String SENT = "SMS_SENT", DELIVERED = "SMS_DELIVERED";
-
-                PendingIntent sentPI = PendingIntent.getBroadcast(ctx, 0, new Intent(
-                        SENT), 0);
-
-                PendingIntent deliveredPI = PendingIntent.getBroadcast(ctx, 0,
-                        new Intent(DELIVERED), 0);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    SubscriptionManager localSubscriptionManager = SubscriptionManager.from(ctx);
-                    if (localSubscriptionManager.getActiveSubscriptionInfoCount() > 1) {
-                        List localList = localSubscriptionManager.getActiveSubscriptionInfoList();
-
-                        SubscriptionInfo simInfo1 = (SubscriptionInfo) localList.get(0);
-                        SubscriptionInfo simInfo2 = (SubscriptionInfo) localList.get(1);
-
-                        //SendSMS From SIM One
-                        SmsManager.getSmsManagerForSubscriptionId(simInfo1.getSubscriptionId()).sendTextMessage(address, null, text, sentPI, deliveredPI);
-                    }
-                } else {
-                    SmsManager.getDefault().sendTextMessage(address, null, text, sentPI, deliveredPI);
-                }
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "OK"));
-            }catch (Exception e) {
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Exception:" + e.getMessage()));
-            }
-        }else{
-            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "SMS is not supported"));
-        }
-        return null;
-    }
-
-    private PluginResult sendSMSOnSim2(String address, String text, CallbackContext callbackContext) {
-        Log.d(LOGTAG, ACTION_SEND_SMS_ON_SIM_2);
-        Context ctx = this.cordova.getActivity().getApplicationContext();
-        if (this.cordova.getActivity().getPackageManager().hasSystemFeature("android.hardware.telephony")) {
-            try {
-                String SENT = "SMS_SENT", DELIVERED = "SMS_DELIVERED";
-
-                PendingIntent sentPI = PendingIntent.getBroadcast(ctx, 0, new Intent(
-                        SENT), 0);
-
-                PendingIntent deliveredPI = PendingIntent.getBroadcast(ctx, 0,
-                        new Intent(DELIVERED), 0);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    SubscriptionManager localSubscriptionManager = SubscriptionManager.from(ctx);
-                    if (localSubscriptionManager.getActiveSubscriptionInfoCount() > 1) {
-                        List localList = localSubscriptionManager.getActiveSubscriptionInfoList();
-
-                        SubscriptionInfo simInfo1 = (SubscriptionInfo) localList.get(0);
-                        SubscriptionInfo simInfo2 = (SubscriptionInfo) localList.get(1);
-
-                        //SendSMS From SIM Two
-                        SmsManager.getSmsManagerForSubscriptionId(simInfo2.getSubscriptionId()).sendTextMessage(address, null, text, sentPI, deliveredPI);
-                    }
-                } else {
-                    SmsManager.getDefault().sendTextMessage(address, null, text, sentPI, deliveredPI);
-                }
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, "OK"));
-            }catch (Exception e) {
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Exception:" + e.getMessage()));
-            }
-        }else{
-            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "SMS is not supported"));
-
+            manager.sendTextMessage(address, null, text, sentIntent, null);
         }
         return null;
     }
@@ -642,6 +557,10 @@ public class SmsUtil
             callbackContext.success(m);
         }
         return null;
+    }
+
+    private boolean checkSupport() {
+        return this.cordova.getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
 }
